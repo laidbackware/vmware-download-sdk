@@ -1,5 +1,5 @@
 // +build debug
 
-package myvmware
+package sdk
 
 import _ "github.com/motemen/go-loghttp/global"
