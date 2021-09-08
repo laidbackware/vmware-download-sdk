@@ -57,7 +57,7 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob
 		return
 	}
 
-	productID := subProductDetails.DlgList.ProductID
+	productID := subProductDetails.ProductID
 	dlgHeader, err := c.GetDlgHeader(apiVersion.Code, productID)
 	if err != nil {
 		return

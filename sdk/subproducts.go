@@ -2,21 +2,29 @@ package sdk
 
 import (
 	"errors"
+	// "fmt"
+	// "reflect"
 	"regexp"
 	"sort"
 	"strings"
 )
 
-type SubProductDetails struct {
-	NiceName string
-	DlgList  DlgList
+type SubProduct struct {
+	ProductName string
+	ProductCode string
+	DlgListByVersion map[string]DlgList
+}
+
+
+type SubProductSliceElement struct {
+	Name string
+	Description string
 }
 
 var ErrorInvalidSubProduct = errors.New("subproduct: invalid subproduct requested")
 var ErrorInvalidSubProductMajorVersion = errors.New("subproduct: invalid major version requested")
 
-// TODO may switch to slice, as having the value as a code may not be useful
-func (c *Client) GetSubProductsMap(slug string) (data map[string]map[string]SubProductDetails, err error) {
+func (c *Client) GetSubProductsMap(slug string) (data map[string]SubProduct, err error) {
 	c.EnsureProductDetailMap()
 	if err != nil {
 		return
@@ -27,7 +35,7 @@ func (c *Client) GetSubProductsMap(slug string) (data map[string]map[string]SubP
 		return
 	}
 
-	subProductMap := make(map[string]map[string]SubProductDetails)
+	subProductMap := make(map[string]SubProduct)
 
 	majorVersions, _ := c.GetMajorVersionsSlice(slug)
 	if err != nil {
@@ -39,26 +47,24 @@ func (c *Client) GetSubProductsMap(slug string) (data map[string]map[string]SubP
 	for _, majorVersion := range majorVersions {
 		dlgEditionsList, _ := c.GetDlgEditionsList(slug, majorVersion)
 		for _, dlgEdition := range dlgEditionsList {
-			for _, product := range dlgEdition.DlgList {
-				// Remove versions from the code and name to allow to be generic
+			for _, dlgList := range dlgEdition.DlgList {
+				// Remove versions from the productCode and productName to allow to be generic
 				re := regexp.MustCompile(`[0-9]+.*`)
-				productCode := re.ReplaceAllString(product.Code, "")
-				productCode = strings.TrimSuffix(strings.TrimSuffix(productCode, "_"), "-")
-				productName := re.ReplaceAllString(product.Name, "")
+				productCode := re.ReplaceAllString(dlgList.Code, "")
+				productCode = strings.ToLower(strings.TrimSuffix(strings.TrimSuffix(productCode, "_"), "-"))
+				productName := re.ReplaceAllString(dlgList.Name, "")
 				productName = strings.TrimSpace(productName)
-				subProductDetails := SubProductDetails{
-					NiceName: productName,
-					DlgList:  product,
+
+				// Initalize the struct for a product code for the first time
+				if _, ok := subProductMap[productCode]; !ok {
+					subProductMap[productCode] = SubProduct{
+						ProductName: productName,
+						ProductCode: productCode,
+						DlgListByVersion: make(map[string]DlgList),
+					}
 				}
 
-				if len(subProductMap[productCode]) == 0 {
-					majorMap := map[string]SubProductDetails{
-						majorVersion: subProductDetails,
-					}
-					subProductMap[productCode] = majorMap
-				} else {
-					subProductMap[productCode][majorVersion] = subProductDetails
-				}
+				subProductMap[productCode].DlgListByVersion[majorVersion] = dlgList
 			}
 		}
 	}
@@ -67,7 +73,7 @@ func (c *Client) GetSubProductsMap(slug string) (data map[string]map[string]SubP
 	return
 }
 
-func (c *Client) GetSubProductsSlice(slug string) (data []map[string]string, err error) {
+func (c *Client) GetSubProductsSlice(slug string) (data []SubProduct, err error) {
 	subProductMap, _ := c.GetSubProductsMap(slug)
 	if err != nil {
 		return
@@ -76,20 +82,15 @@ func (c *Client) GetSubProductsSlice(slug string) (data []map[string]string, err
 	// Sort keys to output sorted slice
 	keys := make([]string, len(subProductMap))
 	i := 0
-	for k := range subProductMap {
-		keys[i] = k
-		// keys = append(keys, k)
+	for key := range subProductMap {
+		keys[i] = key
 		i++
 	}
-
 	sort.Strings(keys)
-	// TODO file to return nice name
-	for k := range subProductMap {
-		product := map[string]string{
-			"code": k,
-			// "name": v.niceName,
-		}
-		data = append(data, product)
+		
+	// Append to array using sorted keys to fetch from map
+	for _, key := range keys {
+		data = append(data, subProductMap[key])
 	}
 
 	return
@@ -108,16 +109,15 @@ func (c *Client) ValidateSubProduct(slug, subProduct string) (err error) {
 	return
 }
 
-// TODO need to return specific version for minor version!
-func (c *Client) GetSubProductDetails(slug, subProduct, majorVersion string) (data SubProductDetails, err error) {
+func (c *Client) GetSubProductDetails(slug, subProduct, majorVersion string) (data DlgList, err error) {
 	subProducts, err := c.GetSubProductsMap(slug)
 	if err != nil {
 		return
 	}
 
-	if subProductVersions, ok := subProducts[subProduct]; ok {
-		if subProductDetails, ok := subProductVersions[majorVersion]; ok {
-			data = subProductDetails
+	if subProduct, ok := subProducts[subProduct]; ok {
+		if dlgList, ok := subProduct.DlgListByVersion[majorVersion]; ok {
+			data = dlgList
 		} else {
 			err = ErrorInvalidSubProductMajorVersion
 		}
