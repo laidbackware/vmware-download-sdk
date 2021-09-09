@@ -29,7 +29,9 @@ func (c *Client) GetVersionMap(slug, subProductName string) (data map[string]API
 
 	// Iterate over all major versions of product to collect actual versions
 	for _, majorVersion := range majorVersions {
-		dlgEditionsList, _ := c.GetDlgEditionsList(slug, majorVersion)
+		var dlgEditionsList []DlgEditionsLists
+		dlgEditionsList, err = c.GetDlgEditionsList(slug, majorVersion)
+		if err != nil {return}
 		var foundProduct DlgList
 
 		// Iterate each edition of each major version of product

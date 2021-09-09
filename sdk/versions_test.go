@@ -4,13 +4,17 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGetVersionSuccess(t *testing.T) {
 	var versions map[string]APIVersions
-	versions, err := basicClient.GetVersionMap("vmware_tools", "vmtools")
-	assert.Nil(t, err)
+	versions, err := basicClient.GetVersionMap("vmware_vsphere", "esxi")
+	require.Nil(t, err)
 	assert.Greater(t, len(versions), 1, "Expected response to contain at least 1 item")
+	assert.Contains(t, versions, "7.0.0")
+	assert.Contains(t, versions, "6.7.0")
+	assert.Contains(t, versions, "6.5.0")
 }
 
 func TestGetVersionMapInvalidSubProduct(t *testing.T) {
