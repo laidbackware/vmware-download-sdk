@@ -31,7 +31,9 @@ func (c *Client) GetVersionMap(slug, subProductName string) (data map[string]API
 	for _, majorVersion := range majorVersions {
 		var dlgEditionsList []DlgEditionsLists
 		dlgEditionsList, err = c.GetDlgEditionsList(slug, majorVersion)
-		if err != nil {return}
+		if err != nil {
+			return
+		}
 		var foundProduct DlgList
 
 		// Iterate each edition of each major version of product
@@ -95,10 +97,10 @@ func (c *Client) FindVersionFromGlob(slug, subProduct, versionGlob string, versi
 	// Ensure only one glob is defined
 	globCount := strings.Count(versionGlob, "*")
 	if globCount == 0 {
-		err = ErrorNoGlob
+		err = ErrorNoFileGlob
 		return
 	} else if globCount > 1 {
-		err = ErrorMultipleGlob
+		err = ErrorMultipleFileGlob
 		return
 	}
 
@@ -128,7 +130,9 @@ func (c *Client) FindVersionFromGlob(slug, subProduct, versionGlob string, versi
 
 func (c *Client) GetVersionSlice(slug, subProductName string) (data []string, err error) {
 	versionMap, _ := c.GetVersionMap(slug, subProductName)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	data = sortVersionMapKeys(versionMap)
 

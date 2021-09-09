@@ -47,7 +47,7 @@ func TestFindDlgDetailsMultipleGlob(t *testing.T) {
 	var downloadDetails FoundDownload
 	downloadDetails, err := authenticatedClient.FindDlgDetails("VMTOOLS1130", "1073", "double*glob*")
 	assert.NotNil(t, err)
-	assert.ErrorIs(t, err, ErrorMultipleGlob)
+	assert.ErrorIs(t, err, ErrorMultipleFileGlob)
 	assert.Empty(t, downloadDetails.DownloadDetails.FileName, "Expected response to be empty")
 }
 
@@ -58,7 +58,7 @@ func TestFindDlgDetailsNoGlob(t *testing.T) {
 	var downloadDetails FoundDownload
 	downloadDetails, err := authenticatedClient.FindDlgDetails("VMTOOLS1130", "1073", "no.glob")
 	assert.NotNil(t, err)
-	assert.ErrorIs(t, err, ErrorNoGlob)
+	assert.ErrorIs(t, err, ErrorNoFileGlob)
 	assert.Empty(t, downloadDetails.DownloadDetails.FileName, "Expected response to be empty")
 }
 

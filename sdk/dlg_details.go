@@ -53,8 +53,8 @@ const (
 )
 
 var ErrorDlgDetailsInputs = errors.New("dlgDetails: downloadGroup or productId invalid")
-var ErrorMultipleGlob = errors.New("dlgDetails: glob invalid. can only contain a single *")
-var ErrorNoGlob = errors.New("dlgDetails: fileNameGlob must contain a *")
+var ErrorMultipleFileGlob = errors.New("dlgDetails: file glob invalid. can only contain a single *")
+var ErrorNoFileGlob = errors.New("dlgDetails: fileNameGlob must contain a *")
 var ErrorNoMatchingFiles = errors.New("dlgDetails: no files match provided glob")
 var ErrorMultipleMatchingFiles = errors.New("dlgDetails: more than 1 file matches glob")
 var ErrorEulaUnaccepted = errors.New("dlgDetails: EULA needs to be accepted for this version")
@@ -95,10 +95,10 @@ func (c *Client) GetDlgDetails(downloadGroup, productId string) (data DlgDetails
 func (c *Client) FindDlgDetails(downloadGroup, productId, fileNameGlob string) (data FoundDownload, err error) {
 	globCount := strings.Count(fileNameGlob, "*")
 	if globCount == 0 {
-		err = ErrorNoGlob
+		err = ErrorNoFileGlob
 		return
 	} else if globCount > 1 {
-		err = ErrorMultipleGlob
+		err = ErrorMultipleFileGlob
 		return
 	}
 
