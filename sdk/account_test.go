@@ -19,7 +19,7 @@ func TestAccountInfo(t *testing.T) {
 
 func TestAccountInfoNotLoggedIn(t *testing.T) {
 	var accountInfo AccountInfo
-	accountInfo, err := basicClient.AccountInfo()
+	accountInfo, err = basicClient.AccountInfo()
 	assert.ErrorIs(t, err, ErrorNotAuthorized)
 	assert.Empty(t, accountInfo, "Expected response to be empty")
 }
@@ -27,13 +27,14 @@ func TestAccountInfoNotLoggedIn(t *testing.T) {
 func TestCurrentUser(t *testing.T) {
 	err = ensureLogin(t)
 	require.Nil(t, err)
-	currentUser, err := authenticatedClient.CurrentUser()
+	var currentUser CurrentUser
+	currentUser, err = authenticatedClient.CurrentUser()
 	t.Log(currentUser)
 	assert.Nil(t, err)
 }
 
 func TestCurrentUserNotLoggedIn(t *testing.T) {
-	_, err := basicClient.CurrentUser()
+	_, err = basicClient.CurrentUser()
 	assert.ErrorIs(t, err, ErrorNotAuthorized)
 }
 

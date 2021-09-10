@@ -18,7 +18,7 @@ func TestFetchEulaLink(t *testing.T) {
 }
 
 func TestFetchEulaLinkInvalidCode(t *testing.T) {
-	err := ensureLogin(t)
+	err = ensureLogin(t)
 	assert.Nil(t, err)
 
 	var eulaUrl string

@@ -18,7 +18,8 @@ var ErrorMultipleVersionGlob = errors.New("versions: invalid glob. a single vers
 func (c *Client) GetVersionMap(slug, subProductName string) (data map[string]APIVersions, err error) {
 	data = make(map[string]APIVersions)
 
-	majorVersions, err := c.GetMajorVersionsSlice(slug)
+	var majorVersions []string
+	majorVersions, err = c.GetMajorVersionsSlice(slug)
 	if err != nil {
 		return
 	}
@@ -72,7 +73,8 @@ func (c *Client) GetVersionMap(slug, subProductName string) (data map[string]API
 }
 
 func (c *Client) FindVersion(slug, subProduct, version string) (data APIVersions, err error) {
-	versionMap, err := c.GetVersionMap(slug, subProduct)
+	var versionMap map[string]APIVersions
+	versionMap, err = c.GetVersionMap(slug, subProduct)
 	if err != nil {
 		return
 	}
@@ -131,7 +133,8 @@ func (c *Client) FindVersionFromGlob(slug, subProduct, versionGlob string, versi
 }
 
 func (c *Client) GetVersionSlice(slug, subProductName string) (data []string, err error) {
-	versionMap, _ := c.GetVersionMap(slug, subProductName)
+	var versionMap map[string]APIVersions
+	versionMap, err = c.GetVersionMap(slug, subProductName)
 	if err != nil {
 		return
 	}

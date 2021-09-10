@@ -3,6 +3,7 @@ package sdk
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 	"strings"
 )
 
@@ -25,7 +26,8 @@ var ErrorNon200Response = errors.New("account: server did not respond with 200 o
 
 func (c *Client) AccountInfo() (data AccountInfo, err error) {
 	payload := `{"rowLimit": 1000}`
-	res, err := c.HttpClient.Post(accountInfoURL, "application/json", strings.NewReader(payload))
+	var res *http.Response
+	res, err = c.HttpClient.Post(accountInfoURL, "application/json", strings.NewReader(payload))
 	if err != nil {
 		return
 	}
@@ -49,7 +51,8 @@ func (c *Client) CurrentUser() (data CurrentUser, err error) {
 		return
 	}
 
-	res, err := c.HttpClient.Get(currentUserURL)
+	var res *http.Response
+	res, err = c.HttpClient.Get(currentUserURL)
 	if err != nil {
 		return
 	}

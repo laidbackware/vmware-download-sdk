@@ -9,7 +9,7 @@ import (
 
 func TestGetVersionSuccess(t *testing.T) {
 	var versions map[string]APIVersions
-	versions, err := basicClient.GetVersionMap("vmware_vsphere", "esxi")
+	versions, err = basicClient.GetVersionMap("vmware_vsphere", "esxi")
 	require.Nil(t, err)
 	assert.Greater(t, len(versions), 1, "Expected response to contain at least 1 item")
 	assert.Contains(t, versions, "7.0.0")
@@ -19,7 +19,7 @@ func TestGetVersionSuccess(t *testing.T) {
 
 func TestGetVersionMapInvalidSubProduct(t *testing.T) {
 	var versions map[string]APIVersions
-	versions, err := basicClient.GetVersionMap("vmware_tools", "dummy")
+	versions, err = basicClient.GetVersionMap("vmware_tools", "dummy")
 	assert.NotNil(t, err)
 	assert.ErrorIs(t, err, ErrorInvalidSubProduct)
 	assert.Empty(t, versions, "Expected response to be empty")
@@ -27,7 +27,7 @@ func TestGetVersionMapInvalidSubProduct(t *testing.T) {
 
 func TestGetVersionInvalidSlug(t *testing.T) {
 	var versions map[string]APIVersions
-	versions, err := basicClient.GetVersionMap("mware_tools", "vmtools")
+	versions, err = basicClient.GetVersionMap("mware_tools", "vmtools")
 	assert.NotNil(t, err)
 	assert.ErrorIs(t, err, ErrorInvalidSlug)
 	assert.Empty(t, versions, "Expected response to be empty")
@@ -77,7 +77,7 @@ func TestFindVersionOnlyGlob(t *testing.T) {
 
 func TestGetVersionArraySuccess(t *testing.T) {
 	var versions []string
-	versions, err := basicClient.GetVersionSlice("vmware_tools", "vmtools")
+	versions, err = basicClient.GetVersionSlice("vmware_tools", "vmtools")
 	assert.Nil(t, err)
 	assert.Greater(t, len(versions), 10, "Expected response to contain at least 10 items")
 }

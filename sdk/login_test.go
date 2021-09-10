@@ -20,9 +20,7 @@ func ensureLogin(t *testing.T) (err error) {
 			Filename:              filepath.Join(homeDir(), ".vmware.cookies"),
 			PersistSessionCookies: true,
 		})
-		if err != nil {
-			return
-		}
+		if err != nil {return}
 		user, pass := mustEnv(t, "VMW_USER"), mustEnv(t, "VMW_PASS")
 		authenticatedClient, err = Login(user, pass, jar)
 		if err == nil {
@@ -43,18 +41,18 @@ func homeDir() string {
 func TestSuccessfulLogin(t *testing.T) {
 	jar, _ := cookiejar.New(&cookiejar.Options{NoPersist: true})
 	user, pass := mustEnv(t, "VMW_USER"), mustEnv(t, "VMW_PASS")
-	_, err := Login(user, pass, jar)
+	_, err = Login(user, pass, jar)
 	assert.Nil(t, err)
 }
 
 func TestFailedLogin(t *testing.T) {
 	jar, _ := cookiejar.New(&cookiejar.Options{NoPersist: true})
-	_, err := Login("user", "pass", jar)
+	_, err = Login("user", "pass", jar)
 	assert.ErrorIs(t, err, ErrorAuthenticationFailure)
 }
 
 func TestSuccessfulConnection(t *testing.T) {
-	err := CheckConnectivity()
+	err = CheckConnectivity()
 	if err != nil {
 		t.Errorf("Expected error not to occur, got %q", err)
 	}

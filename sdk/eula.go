@@ -3,6 +3,7 @@ package sdk
 import (
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 const (
@@ -16,7 +17,8 @@ func (c *Client) FetchEulaUrl(downloadGroup, productId string) (url string, err 
 		return
 	}
 
-	dlgDetails, err := c.GetDlgDetails(downloadGroup, productId)
+	var dlgDetails DlgDetails
+	dlgDetails, err = c.GetDlgDetails(downloadGroup, productId)
 	if err != nil {
 		return
 	}
@@ -32,7 +34,8 @@ func (c *Client) AcceptEula(downloadGroup, productId string) (err error) {
 	}
 
 	search_string := fmt.Sprintf("?downloadGroup=%s&productId=%s", downloadGroup, productId)
-	res, err := c.HttpClient.Get(eulaURL + search_string)
+	var res *http.Response
+	res, err = c.HttpClient.Get(eulaURL + search_string)
 	if err != nil {
 		return
 	}

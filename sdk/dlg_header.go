@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 )
 
 type DlgHeader struct {
@@ -51,10 +52,9 @@ var ErrorDlgHeader = errors.New("dlgHeader: downloadGroup or productId invalid")
 // curl "https://my.vmware.com/channel/public/api/v1.0/products/getDLGHeader?downloadGroup=VMTOOLS1130&productId=1073" |jq
 func (c *Client) GetDlgHeader(downloadGroup, productId string) (data DlgHeader, err error) {
 	search_string := fmt.Sprintf("?downloadGroup=%s&productId=%s", downloadGroup, productId)
-	res, err := c.HttpClient.Get(dlgHeaderURL + search_string)
-	if err != nil {
-		return
-	}
+	var res *http.Response
+	res, err = c.HttpClient.Get(dlgHeaderURL + search_string)
+	if err != nil {return}
 	defer res.Body.Close()
 
 	if res.StatusCode == 400 {

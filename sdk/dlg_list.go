@@ -3,6 +3,7 @@ package sdk
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
 // dlg list
@@ -28,22 +29,18 @@ const (
 
 // curl "https://my.vmware.com/channel/public/api/v1.0/products/getRelatedDLGList?category=datacenter_cloud_infrastructure&product=vmware_vsan&version=7_0&dlgType=PRODUCT_BINARY" |jq
 func (c *Client) GetDlgEditionsList(slug, majorVersion string) (data []DlgEditionsLists, err error) {
-	category, err := c.GetCategory(slug)
-	if err != nil {
-		return
-	}
+	var category string
+	category, err = c.GetCategory(slug)
+	if err != nil {return}
 
 	search_string := fmt.Sprintf("?category=%s&product=%s&version=%s&dlgType=PRODUCT_BINARY", category, slug, majorVersion)
-	res, err := c.HttpClient.Get(dlgListURL + search_string)
-	if err != nil {
-		return
-	}
+	var res *http.Response
+	res, err = c.HttpClient.Get(dlgListURL + search_string)
+	if err != nil {return}
 	defer res.Body.Close()
 
 	err = c.validateResponseSlugCategoryVersion(slug, category, majorVersion, *res)
-	if err != nil {
-		return
-	}
+	if err != nil {return}
 
 	var dlgEditions DlgEditions
 	err = json.NewDecoder(res.Body).Decode(&dlgEditions)

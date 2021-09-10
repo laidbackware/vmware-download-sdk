@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"encoding/json"
+	"net/http"
 	"strings"
 )
 
@@ -31,7 +32,8 @@ type ProductCategoryList struct {
 }
 
 func (c *Client) GetProductsSlice() (data []MajorProducts, err error) {
-	res, err := c.HttpClient.Get(baseURL + "/channel/public/api/v1.0/products/getProductsAtoZ?isPrivate=true")
+	var res *http.Response
+	res, err = c.HttpClient.Get(baseURL + "/channel/public/api/v1.0/products/getProductsAtoZ?isPrivate=true")
 	if err != nil {
 		return
 	}
@@ -51,7 +53,8 @@ func (c *Client) GetProductsSlice() (data []MajorProducts, err error) {
 func (c *Client) GetProductsMap() (productMap map[string]ProductDetails, err error) {
 	productMap = make(map[string]ProductDetails)
 
-	products, err := c.GetProductsSlice()
+	var products []MajorProducts
+	products, err = c.GetProductsSlice()
 	if err != nil {
 		return
 	}

@@ -167,7 +167,8 @@ func getSAMLToken(body io.ReadCloser) (string, error) {
 
 func CheckConnectivity() (err error) {
 	httpClient := &http.Client{}
-	res, err := httpClient.Get(ssoURL)
+	var res *http.Response
+	res, err = httpClient.Get(ssoURL)
 
 	if res.StatusCode != 200 {
 		err = ErrorConnectionFailure

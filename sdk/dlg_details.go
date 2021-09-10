@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 )
 
@@ -73,7 +74,8 @@ func (c *Client) GetDlgDetails(downloadGroup, productId string) (data DlgDetails
 	}
 
 	search_string := fmt.Sprintf("?downloadGroup=%s&productId=%s", downloadGroup, productId)
-	res, err := c.HttpClient.Get(dlgDetailsURL + search_string)
+	var res *http.Response
+	res, err = c.HttpClient.Get(dlgDetailsURL + search_string)
 	if err != nil {
 		return
 	}
@@ -106,10 +108,9 @@ func (c *Client) FindDlgDetails(downloadGroup, productId, fileNameGlob string) (
 		return
 	}
 
-	dlgDetails, err := c.GetDlgDetails(downloadGroup, productId)
-	if err != nil {
-		return
-	}
+	var dlgDetails DlgDetails
+	dlgDetails, err = c.GetDlgDetails(downloadGroup, productId)
+	if err != nil {return}
 
 	// Search for file which matches the single glob pattern
 	splitString := strings.Split(fileNameGlob, "*")

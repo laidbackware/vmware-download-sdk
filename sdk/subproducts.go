@@ -10,14 +10,13 @@ import (
 )
 
 type SubProduct struct {
-	ProductName string
-	ProductCode string
+	ProductName      string
+	ProductCode      string
 	DlgListByVersion map[string]DlgList
 }
 
-
 type SubProductSliceElement struct {
-	Name string
+	Name        string
 	Description string
 }
 
@@ -37,7 +36,8 @@ func (c *Client) GetSubProductsMap(slug string) (data map[string]SubProduct, err
 
 	subProductMap := make(map[string]SubProduct)
 
-	majorVersions, _ := c.GetMajorVersionsSlice(slug)
+	var majorVersions []string
+	majorVersions, err = c.GetMajorVersionsSlice(slug)
 	if err != nil {
 		return
 	}
@@ -45,7 +45,11 @@ func (c *Client) GetSubProductsMap(slug string) (data map[string]SubProduct, err
 	// Iterate major product versions and extract all unique products
 	// All version information is stripped
 	for _, majorVersion := range majorVersions {
-		dlgEditionsList, _ := c.GetDlgEditionsList(slug, majorVersion)
+		var dlgEditionsList []DlgEditionsLists
+		dlgEditionsList, err = c.GetDlgEditionsList(slug, majorVersion)
+		if err != nil {
+			return
+		}
 		for _, dlgEdition := range dlgEditionsList {
 			for _, dlgList := range dlgEdition.DlgList {
 				// Remove versions from the productCode and productName to allow to be generic
@@ -58,8 +62,8 @@ func (c *Client) GetSubProductsMap(slug string) (data map[string]SubProduct, err
 				// Initalize the struct for a product code for the first time
 				if _, ok := subProductMap[productCode]; !ok {
 					subProductMap[productCode] = SubProduct{
-						ProductName: productName,
-						ProductCode: productCode,
+						ProductName:      productName,
+						ProductCode:      productCode,
 						DlgListByVersion: make(map[string]DlgList),
 					}
 				}
@@ -87,7 +91,7 @@ func (c *Client) GetSubProductsSlice(slug string) (data []SubProduct, err error)
 		i++
 	}
 	sort.Strings(keys)
-		
+
 	// Append to array using sorted keys to fetch from map
 	for _, key := range keys {
 		data = append(data, subProductMap[key])
@@ -97,7 +101,8 @@ func (c *Client) GetSubProductsSlice(slug string) (data []SubProduct, err error)
 }
 
 func (c *Client) ValidateSubProduct(slug, subProduct string) (err error) {
-	subProductMap, _ := c.GetSubProductsMap(slug)
+	var subProductMap map[string]SubProduct
+	subProductMap, err = c.GetSubProductsMap(slug)
 	if err != nil {
 		return
 	}
@@ -110,7 +115,8 @@ func (c *Client) ValidateSubProduct(slug, subProduct string) (err error) {
 }
 
 func (c *Client) GetSubProductDetails(slug, subProduct, majorVersion string) (data DlgList, err error) {
-	subProducts, err := c.GetSubProductsMap(slug)
+	var subProducts map[string]SubProduct
+	subProducts, err = c.GetSubProductsMap(slug)
 	if err != nil {
 		return
 	}

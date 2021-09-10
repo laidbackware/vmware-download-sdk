@@ -47,23 +47,27 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob
 	}
 
 	// Find the API version details
-	apiVersion, err := c.FindVersion(slug, subProduct, version)
+	var apiVersion APIVersions
+	apiVersion, err = c.FindVersion(slug, subProduct, version)
 	if err != nil {
 		return
 	}
 
-	subProductDetails, err := c.GetSubProductDetails(slug, subProduct, apiVersion.MajorVersion)
+	var subProductDetails DlgList
+	subProductDetails, err = c.GetSubProductDetails(slug, subProduct, apiVersion.MajorVersion)
 	if err != nil {
 		return
 	}
 
 	productID := subProductDetails.ProductID
-	dlgHeader, err := c.GetDlgHeader(apiVersion.Code, productID)
+	var dlgHeader DlgHeader
+	dlgHeader, err = c.GetDlgHeader(apiVersion.Code, productID)
 	if err != nil {
 		return
 	}
 
-	downloadDetails, err := c.FindDlgDetails(apiVersion.Code, productID, fileNameGlob)
+	var downloadDetails FoundDownload
+	downloadDetails, err = c.FindDlgDetails(apiVersion.Code, productID, fileNameGlob)
 	if err != nil {
 		return
 	}
@@ -110,13 +114,15 @@ func (c *Client) FetchDownloadLink(downloadPayload DownloadPayload) (data Author
 	postJson, _ := json.Marshal(downloadPayload)
 	payload := bytes.NewBuffer(postJson)
 
-	req, err := http.NewRequest("POST", downloadURL, payload)
+	var req *http.Request
+	req, err = http.NewRequest("POST", downloadURL, payload)
 	if err != nil {
 		return
 	}
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-XSRF-TOKEN", c.XsrfToken)
-	res, err := c.HttpClient.Do(req)
+	var res *http.Response
+	res, err = c.HttpClient.Do(req)
 	if err != nil {
 		return
 	}
