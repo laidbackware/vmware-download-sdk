@@ -74,7 +74,7 @@ func (c *Client) GetSubProductsMap(slug string) (data map[string]SubProduct, err
 }
 
 func (c *Client) GetSubProductsSlice(slug string) (data []SubProduct, err error) {
-	subProductMap, _ := c.GetSubProductsMap(slug)
+	subProductMap, err := c.GetSubProductsMap(slug)
 	if err != nil {
 		return
 	}

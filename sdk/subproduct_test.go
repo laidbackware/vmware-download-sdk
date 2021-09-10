@@ -13,6 +13,13 @@ func TestGetSubProductsSlice(t *testing.T) {
 	assert.Greater(t, len(subProducts), 16, "Expected response to contain at least 16 items")
 }
 
+func TestGetSubProductsSliceInvalidSlug(t *testing.T) {
+	var subProducts []SubProduct
+	subProducts, err = basicClient.GetSubProductsSlice("vsphere")
+	assert.ErrorIs(t, err, ErrorInvalidSlug)
+	assert.Empty(t, subProducts, "Expected response to be empty")
+}
+
 func TestGetSubProductsMap(t *testing.T) {
 	var subProducts map[string]SubProduct
 	subProducts, err = basicClient.GetSubProductsMap("vmware_vsphere")
@@ -23,7 +30,7 @@ func TestGetSubProductsMap(t *testing.T) {
 func TestGetSubProductsMapInvalidSlug(t *testing.T) {
 	var subProductMap map[string]SubProduct
 	subProductMap, err = basicClient.GetSubProductsMap("vsphere")
-	assert.NotNil(t, err)
+	assert.ErrorIs(t, err, ErrorInvalidSlug)
 	assert.Empty(t, subProductMap, "Expected response to be empty")
 }
 
