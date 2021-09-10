@@ -46,28 +46,32 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob
 		return
 	}
 
-	// Find the API version details
-	var apiVersion APIVersions
-	apiVersion, err = c.FindVersion(slug, subProduct, version)
-	if err != nil {
-		return
-	}
+	// // Find the API version details
+	// var apiVersion APIVersions
+	// apiVersion, err = c.FindVersion(slug, subProduct, version)
+	// if err != nil {
+	// 	return
+	// }
 
-	var subProductDetails DlgList
-	subProductDetails, err = c.GetSubProductDetails(slug, subProduct, apiVersion.MajorVersion)
-	if err != nil {
-		return
-	}
+	// var subProductDetails DlgList
+	// subProductDetails, err = c.GetSubProductDetails(slug, subProduct, apiVersion.MajorVersion)
+	// if err != nil {
+	// 	return
+	// }
 
-	productID := subProductDetails.ProductID
+	// productID := subProductDetails.ProductID
+	var downloadGroup, productID string
+	downloadGroup, productID, err = c.GetDlgProduct(slug, subProduct, version)
+	if err != nil {return}
+
 	var dlgHeader DlgHeader
-	dlgHeader, err = c.GetDlgHeader(apiVersion.Code, productID)
+	dlgHeader, err = c.GetDlgHeader(downloadGroup, productID)
 	if err != nil {
 		return
 	}
 
 	var downloadDetails FoundDownload
-	downloadDetails, err = c.FindDlgDetails(apiVersion.Code, productID, fileNameGlob)
+	downloadDetails, err = c.FindDlgDetails(downloadGroup, productID, fileNameGlob)
 	if err != nil {
 		return
 	}
@@ -82,7 +86,7 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob
 			err = ErrorEulaUnaccepted
 			return
 		} else {
-			err = c.AcceptEula(apiVersion.Code, productID)
+			err = c.AcceptEula(downloadGroup, productID)
 			if err != nil {
 				return
 			}
@@ -91,7 +95,7 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob
 
 	data = DownloadPayload{
 		Locale:        "en_US",
-		DownloadGroup: apiVersion.Code,
+		DownloadGroup: downloadGroup,
 		ProductId:     productID,
 		Md5checksum:   downloadDetails.DownloadDetails.Md5Checksum,
 		TagId:         dlgHeader.Dlg.TagID,

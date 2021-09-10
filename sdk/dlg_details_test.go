@@ -83,3 +83,24 @@ func TestFindDlgDetailsMultipleMatch(t *testing.T) {
 	assert.ErrorIs(t, err, ErrorMultipleMatchingFiles)
 	assert.Empty(t, downloadDetails.DownloadDetails.FileName, "Expected response to be empty")
 }
+
+func TestGetFileArray(t *testing.T) {
+	err = ensureLogin(t)
+	require.Nil(t, err)
+
+	var fileArray []string
+	fileArray, err = authenticatedClient.GetFileArray("vmware_tools", "vmtools", "11.1.1")
+	assert.Nil(t, err)
+	assert.NotEmpty(t, fileArray, "Expected response to no be empty")
+}
+
+func TestGetGetDlgProduct(t *testing.T) {
+	err = ensureLogin(t)
+	require.Nil(t, err)
+
+	var downloadGroup, productID string
+	downloadGroup, productID, err = authenticatedClient.GetDlgProduct("vmware_tools", "vmtools", "11.1.1")
+	assert.Nil(t, err)
+	assert.NotEmpty(t, downloadGroup, "Expected response to no be empty")
+	assert.NotEmpty(t, productID, "Expected response to no be empty")
+}

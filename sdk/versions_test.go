@@ -20,7 +20,6 @@ func TestGetVersionSuccess(t *testing.T) {
 func TestGetVersionMapInvalidSubProduct(t *testing.T) {
 	var versions map[string]APIVersions
 	versions, err = basicClient.GetVersionMap("vmware_tools", "dummy")
-	assert.NotNil(t, err)
 	assert.ErrorIs(t, err, ErrorInvalidSubProduct)
 	assert.Empty(t, versions, "Expected response to be empty")
 }
@@ -28,7 +27,6 @@ func TestGetVersionMapInvalidSubProduct(t *testing.T) {
 func TestGetVersionInvalidSlug(t *testing.T) {
 	var versions map[string]APIVersions
 	versions, err = basicClient.GetVersionMap("mware_tools", "vmtools")
-	assert.NotNil(t, err)
 	assert.ErrorIs(t, err, ErrorInvalidSlug)
 	assert.Empty(t, versions, "Expected response to be empty")
 }
