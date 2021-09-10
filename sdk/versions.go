@@ -11,7 +11,9 @@ type APIVersions struct {
 	MajorVersion string
 }
 
-var ErrorInvalidVersionGlob = errors.New("versions: invalid glob. No versions found")
+var ErrorNoMatchingVersions = errors.New("versions: invalid glob. no versions found")
+var ErrorNoVersinGlob = errors.New("versions: invalid glob. glob my be provided")
+var ErrorMultipleVersionGlob = errors.New("versions: invalid glob. a single version glob must be used")
 
 func (c *Client) GetVersionMap(slug, subProductName string) (data map[string]APIVersions, err error) {
 	data = make(map[string]APIVersions)
@@ -97,10 +99,10 @@ func (c *Client) FindVersionFromGlob(slug, subProduct, versionGlob string, versi
 	// Ensure only one glob is defined
 	globCount := strings.Count(versionGlob, "*")
 	if globCount == 0 {
-		err = ErrorNoFileGlob
+		err = ErrorNoVersinGlob
 		return
 	} else if globCount > 1 {
-		err = ErrorMultipleFileGlob
+		err = ErrorMultipleVersionGlob
 		return
 	}
 
@@ -124,7 +126,7 @@ func (c *Client) FindVersionFromGlob(slug, subProduct, versionGlob string, versi
 		}
 	}
 
-	err = ErrorInvalidVersionGlob
+	err = ErrorNoMatchingVersions
 	return
 }
 

@@ -83,7 +83,7 @@ func TestGenerateDownloadInvalidVersionGlob(t *testing.T) {
 
 	var downloadPayload DownloadPayload
 	downloadPayload, err = authenticatedClient.GenerateDownloadPayload("vmware_tools", "vmtools", "666.*", "VMware-Tools-darwin-*.tar.gz", true)
-	assert.ErrorIs(t, err, ErrorInvalidVersionGlob)
+	assert.ErrorIs(t, err, ErrorNoMatchingVersions)
 	assert.Empty(t, downloadPayload.ProductId, "Expected response to be empty")
 }
 
@@ -93,6 +93,6 @@ func TestGenerateDownloadDoubleVersion(t *testing.T) {
 
 	var downloadPayload DownloadPayload
 	downloadPayload, err = authenticatedClient.GenerateDownloadPayload("vmware_tools", "vmtools", "*.*", "VMware-Tools-darwin-*.tar.gz", true)
-	assert.ErrorIs(t, err, ErrorMultipleFileGlob)
+	assert.ErrorIs(t, err, ErrorMultipleVersionGlob)
 	assert.Empty(t, downloadPayload.ProductId, "Expected response to be empty")
 }
