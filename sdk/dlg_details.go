@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strings"
 )
 
@@ -94,13 +95,10 @@ func (c *Client) GetDlgDetails(downloadGroup, productId string) (data DlgDetails
 	return
 }
 
-func (c *Client) FindDlgDetails(downloadGroup, productId, fileNameGlob string) (data FoundDownload, err error) {
+func (c *Client) FindDlgDetails(downloadGroup, productId, fileNameGlob string) (data []FoundDownload, err error) {
 	globCount := strings.Count(fileNameGlob, "*")
 	if globCount == 0 {
 		err = ErrorNoFileGlob
-		return
-	} else if globCount > 1 {
-		err = ErrorMultipleFileGlob
 		return
 	}
 
@@ -113,29 +111,21 @@ func (c *Client) FindDlgDetails(downloadGroup, productId, fileNameGlob string) (
 	if err != nil {return}
 
 	// Search for file which matches the single glob pattern
-	splitString := strings.Split(fileNameGlob, "*")
-	foundFiles := 0
-	var foundDownload DownloadDetails
 	for _, download := range dlgDetails.DownloadDetails {
-		fn := download.FileName
-		if strings.HasPrefix(fn, splitString[0]) && strings.HasSuffix(fn, splitString[1]) {
-			foundFiles++
-			foundDownload = download
+		filename := download.FileName
+		if match, _ := filepath.Match(fileNameGlob, filename); match {
+			foundDownload := FoundDownload{
+				DownloadDetails:    download,
+				EulaAccepted:       dlgDetails.EulaResponse.EulaAccepted,
+				EligibleToDownload: dlgDetails.EligibilityResponse.EligibleToDownload,
+			}
+			data = append(data, foundDownload)
 		}
 	}
 
-	if foundFiles == 0 {
+	if len(data) == 0 {
 		err = ErrorNoMatchingFiles
-	} else if foundFiles > 1 {
-		err = ErrorMultipleMatchingFiles
-	} else {
-		data = FoundDownload{
-			DownloadDetails:    foundDownload,
-			EulaAccepted:       dlgDetails.EulaResponse.EulaAccepted,
-			EligibleToDownload: dlgDetails.EligibilityResponse.EligibleToDownload,
-		}
-
-	}
+	} 
 	return
 }
 

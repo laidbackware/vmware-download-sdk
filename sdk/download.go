@@ -32,7 +32,7 @@ const (
 
 var ErrorInvalidDownloadPayload = errors.New("download: invalid download payload")
 
-func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob string, acceptEula bool) (data DownloadPayload, err error) {
+func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob string, acceptEula bool) (data []DownloadPayload, err error) {
 	if err = c.EnsureLoggedIn(); err != nil {
 		return
 	}
@@ -46,20 +46,6 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob
 		return
 	}
 
-	// // Find the API version details
-	// var apiVersion APIVersions
-	// apiVersion, err = c.FindVersion(slug, subProduct, version)
-	// if err != nil {
-	// 	return
-	// }
-
-	// var subProductDetails DlgList
-	// subProductDetails, err = c.GetSubProductDetails(slug, subProduct, apiVersion.MajorVersion)
-	// if err != nil {
-	// 	return
-	// }
-
-	// productID := subProductDetails.ProductID
 	var downloadGroup, productID string
 	downloadGroup, productID, err = c.GetDlgProduct(slug, subProduct, version)
 	if err != nil {return}
@@ -70,41 +56,46 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob
 		return
 	}
 
-	var downloadDetails FoundDownload
+	var downloadDetails []FoundDownload
 	downloadDetails, err = c.FindDlgDetails(downloadGroup, productID, fileNameGlob)
 	if err != nil {
 		return
 	}
 
-	if !downloadDetails.EligibleToDownload {
-		err = ErrorNotEntitled
-		return
-	}
-
-	if !downloadDetails.EulaAccepted {
-		if !acceptEula {
-			err = ErrorEulaUnaccepted
+	for _, foundDownload := range downloadDetails {
+		if !foundDownload.EligibleToDownload {
+			err = ErrorNotEntitled
 			return
-		} else {
-			err = c.AcceptEula(downloadGroup, productID)
-			if err != nil {
+		}
+	
+		if !foundDownload.EulaAccepted {
+			if !acceptEula {
+				err = ErrorEulaUnaccepted
 				return
+			} else {
+				err = c.AcceptEula(downloadGroup, productID)
+				if err != nil {
+					return
+				}
 			}
 		}
-	}
 
-	data = DownloadPayload{
-		Locale:        "en_US",
-		DownloadGroup: downloadGroup,
-		ProductId:     productID,
-		Md5checksum:   downloadDetails.DownloadDetails.Md5Checksum,
-		TagId:         dlgHeader.Dlg.TagID,
-		UUId:          downloadDetails.DownloadDetails.UUID,
-		DlgType:       dlgHeader.Dlg.Type,
-		ProductFamily: dlgHeader.Product.Name,
-		ReleaseDate:   downloadDetails.DownloadDetails.ReleaseDate,
-		DlgVersion:    downloadDetails.DownloadDetails.Version,
-		IsBetaFlow:    false,
+		downloadPayload := DownloadPayload{
+			Locale:        "en_US",
+			DownloadGroup: downloadGroup,
+			ProductId:     productID,
+			Md5checksum:   foundDownload.DownloadDetails.Md5Checksum,
+			TagId:         dlgHeader.Dlg.TagID,
+			UUId:          foundDownload.DownloadDetails.UUID,
+			DlgType:       dlgHeader.Dlg.Type,
+			ProductFamily: dlgHeader.Product.Name,
+			ReleaseDate:   foundDownload.DownloadDetails.ReleaseDate,
+			DlgVersion:    foundDownload.DownloadDetails.Version,
+			IsBetaFlow:    false,
+		}
+
+		data = append(data, downloadPayload)
+
 	}
 
 	return
