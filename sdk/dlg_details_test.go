@@ -34,54 +34,54 @@ func TestFindDlgDetailsSuccess(t *testing.T) {
 	err = ensureLogin(t)
 	require.Nil(t, err)
 
-	var downloadDetails []FoundDownload
+	var downloadDetails FoundDownload
 	downloadDetails, err = authenticatedClient.FindDlgDetails("VMTOOLS1130", "1073", "VMware-Tools-darwin-*.tar.gz")
 	assert.Nil(t, err)
-	require.NotEmpty(t, downloadDetails)
-	assert.NotEmpty(t, downloadDetails[0].DownloadDetails.FileName, "Expected response to not be empty")
+	require.NotEmpty(t, downloadDetails.DownloadDetails)
+	assert.NotEmpty(t, downloadDetails.DownloadDetails[0].FileName, "Expected response to not be empty")
 }
 
 func TestFindDlgDetailsGlobMultipleResults(t *testing.T) {
 	err = ensureLogin(t)
 	require.Nil(t, err)
 
-	var downloadDetails []FoundDownload
+	var downloadDetails FoundDownload
 	downloadDetails, err = authenticatedClient.FindDlgDetails("VMTOOLS1130", "1073", "*")
 	assert.Nil(t, err)
-	assert.Greater(t, len(downloadDetails), 1, "Expected response to be empty")
+	assert.Greater(t, len(downloadDetails.DownloadDetails), 1, "Expected response to be empty")
 }
 
 func TestFindDlgDetailsMultipleGlob(t *testing.T) {
 	err = ensureLogin(t)
 	require.Nil(t, err)
 
-	var downloadDetails []FoundDownload
+	var downloadDetails FoundDownload
 	downloadDetails, err = authenticatedClient.FindDlgDetails("VMTOOLS1130", "1073", "VMware-Tools-*-core-offline-depot-ESXi-all-*.zip")
 	assert.Nil(t, err)
-	require.NotEmpty(t, downloadDetails)
-	assert.NotEmpty(t, downloadDetails[0].DownloadDetails.FileName, "Expected response to not be empty")
+	require.NotEmpty(t, downloadDetails.DownloadDetails)
+	assert.NotEmpty(t, downloadDetails.DownloadDetails[0].FileName, "Expected response to not be empty")
 }
 
 func TestFindDlgDetailsNoGlob(t *testing.T) {
 	err = ensureLogin(t)
 	require.Nil(t, err)
 
-	var downloadDetails []FoundDownload
-	downloadDetails, err = authenticatedClient.FindDlgDetails("VMTOOLS1130", "1073", "no.glob")
-	assert.NotNil(t, err)
-	assert.ErrorIs(t, err, ErrorNoFileGlob)
-	assert.Empty(t, downloadDetails, "Expected response to be empty")
+	var downloadDetails FoundDownload
+	downloadDetails, err = authenticatedClient.FindDlgDetails("VMTOOLS1130", "1073", "VMware-Tools-11.3.0-core-offline-depot-ESXi-all-18090558.zip")
+	assert.Nil(t, err)
+	require.NotEmpty(t, downloadDetails.DownloadDetails)
+	assert.NotEmpty(t, downloadDetails.DownloadDetails[0].FileName, "Expected response to not be empty")
 }
 
 func TestFindDlgDetailsNoMatch(t *testing.T) {
 	err = ensureLogin(t)
 	require.Nil(t, err)
 
-	var downloadDetails []FoundDownload
+	var downloadDetails FoundDownload
 	downloadDetails, err = authenticatedClient.FindDlgDetails("VMTOOLS1130", "1073", "invalid*glob")
 	assert.NotNil(t, err)
 	assert.ErrorIs(t, err, ErrorNoMatchingFiles)
-	assert.Empty(t, downloadDetails, "Expected response to be empty")
+	assert.Empty(t, downloadDetails.DownloadDetails, "Expected response to be empty")
 }
 
 func TestGetFileArray(t *testing.T) {

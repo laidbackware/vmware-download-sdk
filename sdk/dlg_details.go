@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
-	"strings"
 )
 
 type DlgDetails struct {
@@ -44,7 +43,7 @@ type EulaResponse struct {
 }
 
 type FoundDownload struct {
-	DownloadDetails    DownloadDetails
+	DownloadDetails    []DownloadDetails
 	EulaAccepted       bool
 	EligibleToDownload bool
 }
@@ -54,13 +53,13 @@ const (
 	dlgDetailsURLPublic        = baseURL + "/channel/public/api/v1.0/dlg/details"
 )
 
-var ErrorDlgDetailsInputs = errors.New("dlgDetails: downloadGroup or productId invalid")
-var ErrorMultipleFileGlob = errors.New("dlgDetails: file glob invalid. can only contain a single *")
-var ErrorNoFileGlob = errors.New("dlgDetails: fileNameGlob must contain a *")
-var ErrorNoMatchingFiles = errors.New("dlgDetails: no files match provided glob")
-var ErrorMultipleMatchingFiles = errors.New("dlgDetails: more than 1 file matches glob")
-var ErrorEulaUnaccepted = errors.New("dlgDetails: EULA needs to be accepted for this version")
-var ErrorNotEntitled = errors.New("dlgDetails: user is not entitled to download this file")
+var (
+ ErrorDlgDetailsInputs = errors.New("dlgDetails: downloadGroup or productId invalid")
+ ErrorNoMatchingFiles = errors.New("dlgDetails: no files match provided glob")
+ ErrorMultipleMatchingFiles = errors.New("dlgDetails: more than 1 file matches glob")
+ ErrorEulaUnaccepted = errors.New("dlgDetails: EULA needs to be accepted for this version")
+ ErrorNotEntitled = errors.New("dlgDetails: user is not entitled to download this file")
+)
 
 // curl "https://my.vmware.com/channel/public/api/v1.0/dlg/details?downloadGroup=VMTOOLS1130&productId=1073" |jq
 func (c *Client) GetDlgDetails(downloadGroup, productId string) (data DlgDetails, err error) {
@@ -95,13 +94,7 @@ func (c *Client) GetDlgDetails(downloadGroup, productId string) (data DlgDetails
 	return
 }
 
-func (c *Client) FindDlgDetails(downloadGroup, productId, fileNameGlob string) (data []FoundDownload, err error) {
-	globCount := strings.Count(fileNameGlob, "*")
-	if globCount == 0 {
-		err = ErrorNoFileGlob
-		return
-	}
-
+func (c *Client) FindDlgDetails(downloadGroup, productId, fileName string) (data FoundDownload, err error) {
 	if err = c.EnsureLoggedIn(); err != nil {
 		return
 	}
@@ -110,20 +103,21 @@ func (c *Client) FindDlgDetails(downloadGroup, productId, fileNameGlob string) (
 	dlgDetails, err = c.GetDlgDetails(downloadGroup, productId)
 	if err != nil {return}
 
-	// Search for file which matches the single glob pattern
+	data = FoundDownload{
+		EulaAccepted:       dlgDetails.EulaResponse.EulaAccepted,
+		EligibleToDownload: dlgDetails.EligibilityResponse.EligibleToDownload,
+	}
+
+	// Search for file which matches the pattern. If glob is used multiple will return.
 	for _, download := range dlgDetails.DownloadDetails {
 		filename := download.FileName
-		if match, _ := filepath.Match(fileNameGlob, filename); match {
-			foundDownload := FoundDownload{
-				DownloadDetails:    download,
-				EulaAccepted:       dlgDetails.EulaResponse.EulaAccepted,
-				EligibleToDownload: dlgDetails.EligibilityResponse.EligibleToDownload,
-			}
-			data = append(data, foundDownload)
+		if match, _ := filepath.Match(fileName, filename); match {
+			
+			data.DownloadDetails = append(data.DownloadDetails, download)
 		}
 	}
 
-	if len(data) == 0 {
+	if len(data.DownloadDetails) == 0 {
 		err = ErrorNoMatchingFiles
 	} 
 	return

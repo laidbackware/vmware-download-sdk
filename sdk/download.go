@@ -32,7 +32,7 @@ const (
 
 var ErrorInvalidDownloadPayload = errors.New("download: invalid download payload")
 
-func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob string, acceptEula bool) (data []DownloadPayload, err error) {
+func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileName string, acceptEula bool) (data []DownloadPayload, err error) {
 	if err = c.EnsureLoggedIn(); err != nil {
 		return
 	}
@@ -56,41 +56,41 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileNameGlob
 		return
 	}
 
-	var downloadDetails []FoundDownload
-	downloadDetails, err = c.FindDlgDetails(downloadGroup, productID, fileNameGlob)
+	var downloadDetails FoundDownload
+	downloadDetails, err = c.FindDlgDetails(downloadGroup, productID, fileName)
 	if err != nil {
 		return
 	}
 
-	for _, foundDownload := range downloadDetails {
-		if !foundDownload.EligibleToDownload {
-			err = ErrorNotEntitled
+	if !downloadDetails.EligibleToDownload {
+		err = ErrorNotEntitled
+		return
+	}
+
+	if !downloadDetails.EulaAccepted {
+		if !acceptEula {
+			err = ErrorEulaUnaccepted
 			return
-		}
-	
-		if !foundDownload.EulaAccepted {
-			if !acceptEula {
-				err = ErrorEulaUnaccepted
+		} else {
+			err = c.AcceptEula(downloadGroup, productID)
+			if err != nil {
 				return
-			} else {
-				err = c.AcceptEula(downloadGroup, productID)
-				if err != nil {
-					return
-				}
 			}
 		}
+	}
 
+	for _, downloadFile := range downloadDetails.DownloadDetails {
 		downloadPayload := DownloadPayload{
 			Locale:        "en_US",
 			DownloadGroup: downloadGroup,
 			ProductId:     productID,
-			Md5checksum:   foundDownload.DownloadDetails.Md5Checksum,
+			Md5checksum:   downloadFile.Md5Checksum,
 			TagId:         dlgHeader.Dlg.TagID,
-			UUId:          foundDownload.DownloadDetails.UUID,
+			UUId:          downloadFile.UUID,
 			DlgType:       dlgHeader.Dlg.Type,
 			ProductFamily: dlgHeader.Product.Name,
-			ReleaseDate:   foundDownload.DownloadDetails.ReleaseDate,
-			DlgVersion:    foundDownload.DownloadDetails.Version,
+			ReleaseDate:   downloadFile.ReleaseDate,
+			DlgVersion:    downloadFile.Version,
 			IsBetaFlow:    false,
 		}
 
