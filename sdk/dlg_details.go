@@ -54,16 +54,16 @@ const (
 )
 
 var (
- ErrorDlgDetailsInputs = errors.New("dlgDetails: downloadGroup or productId invalid")
- ErrorNoMatchingFiles = errors.New("dlgDetails: no files match provided glob")
- ErrorMultipleMatchingFiles = errors.New("dlgDetails: more than 1 file matches glob")
- ErrorEulaUnaccepted = errors.New("dlgDetails: EULA needs to be accepted for this version")
- ErrorNotEntitled = errors.New("dlgDetails: user is not entitled to download this file")
+	ErrorDlgDetailsInputs      = errors.New("dlgDetails: downloadGroup or productId invalid")
+	ErrorNoMatchingFiles       = errors.New("dlgDetails: no files match provided glob")
+	ErrorMultipleMatchingFiles = errors.New("dlgDetails: more than 1 file matches glob")
+	ErrorEulaUnaccepted        = errors.New("dlgDetails: EULA needs to be accepted for this version")
+	ErrorNotEntitled           = errors.New("dlgDetails: user is not entitled to download this file")
 )
 
 // curl "https://my.vmware.com/channel/public/api/v1.0/dlg/details?downloadGroup=VMTOOLS1130&productId=1073" |jq
 func (c *Client) GetDlgDetails(downloadGroup, productId string) (data DlgDetails, err error) {
-	err = c.EnsureLoggedIn()
+	err = c.CheckLoggedIn()
 	// Use public URL when user is not logged in
 	// This will not return entitlement or EULA sections
 	var dlgDetailsURL string
@@ -95,13 +95,15 @@ func (c *Client) GetDlgDetails(downloadGroup, productId string) (data DlgDetails
 }
 
 func (c *Client) FindDlgDetails(downloadGroup, productId, fileName string) (data FoundDownload, err error) {
-	if err = c.EnsureLoggedIn(); err != nil {
+	if err = c.CheckLoggedIn(); err != nil {
 		return
 	}
 
 	var dlgDetails DlgDetails
 	dlgDetails, err = c.GetDlgDetails(downloadGroup, productId)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	data = FoundDownload{
 		EulaAccepted:       dlgDetails.EulaResponse.EulaAccepted,
@@ -112,25 +114,29 @@ func (c *Client) FindDlgDetails(downloadGroup, productId, fileName string) (data
 	for _, download := range dlgDetails.DownloadDetails {
 		filename := download.FileName
 		if match, _ := filepath.Match(fileName, filename); match {
-			
+
 			data.DownloadDetails = append(data.DownloadDetails, download)
 		}
 	}
 
 	if len(data.DownloadDetails) == 0 {
 		err = ErrorNoMatchingFiles
-	} 
+	}
 	return
 }
 
 func (c *Client) GetFileArray(slug, subProduct, version string) (data []string, err error) {
 	var downloadGroup, productID string
 	downloadGroup, productID, err = c.GetDlgProduct(slug, subProduct, version)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	var dlgDetails DlgDetails
 	dlgDetails, err = c.GetDlgDetails(downloadGroup, productID)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	for _, download := range dlgDetails.DownloadDetails {
 		if download.FileName != "" {
@@ -142,7 +148,7 @@ func (c *Client) GetFileArray(slug, subProduct, version string) (data []string, 
 }
 
 func (c *Client) GetDlgProduct(slug, subProduct, version string) (downloadGroup, productID string, err error) {
-	if err = c.EnsureLoggedIn(); err != nil {
+	if err = c.CheckLoggedIn(); err != nil {
 		return
 	}
 

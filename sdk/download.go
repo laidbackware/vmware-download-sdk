@@ -33,7 +33,7 @@ const (
 var ErrorInvalidDownloadPayload = errors.New("download: invalid download payload")
 
 func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileName string, acceptEula bool) (data []DownloadPayload, err error) {
-	if err = c.EnsureLoggedIn(); err != nil {
+	if err = c.CheckLoggedIn(); err != nil {
 		return
 	}
 
@@ -48,7 +48,9 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileName str
 
 	var downloadGroup, productID string
 	downloadGroup, productID, err = c.GetDlgProduct(slug, subProduct, version)
-	if err != nil {return}
+	if err != nil {
+		return
+	}
 
 	var dlgHeader DlgHeader
 	dlgHeader, err = c.GetDlgHeader(downloadGroup, productID)
@@ -102,7 +104,7 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileName str
 }
 
 func (c *Client) FetchDownloadLink(downloadPayload DownloadPayload) (data AuthorizedDownload, err error) {
-	if err = c.EnsureLoggedIn(); err != nil {
+	if err = c.CheckLoggedIn(); err != nil {
 		return
 	}
 

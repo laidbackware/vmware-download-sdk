@@ -41,13 +41,13 @@ func (c *Client) AccountInfo() (data AccountInfo, err error) {
 	return
 }
 
-func (c *Client) EnsureLoggedIn() (err error) {
+func (c *Client) CheckLoggedIn() (err error) {
 	_, err = c.AccountInfo()
 	return
 }
 
 func (c *Client) CurrentUser() (data CurrentUser, err error) {
-	if err = c.EnsureLoggedIn(); err != nil {
+	if err = c.CheckLoggedIn(); err != nil {
 		return
 	}
 

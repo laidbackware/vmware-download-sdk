@@ -13,7 +13,7 @@ const (
 var ErrorEulaInputs = errors.New("eula: downloadGroup or productId invalid")
 
 func (c *Client) FetchEulaUrl(downloadGroup, productId string) (url string, err error) {
-	if err = c.EnsureLoggedIn(); err != nil {
+	if err = c.CheckLoggedIn(); err != nil {
 		return
 	}
 
@@ -29,7 +29,7 @@ func (c *Client) FetchEulaUrl(downloadGroup, productId string) (url string, err 
 }
 
 func (c *Client) AcceptEula(downloadGroup, productId string) (err error) {
-	if err = c.EnsureLoggedIn(); err != nil {
+	if err = c.CheckLoggedIn(); err != nil {
 		return
 	}
 
