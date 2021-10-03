@@ -17,7 +17,6 @@ func TestFetchDownloadLinkVersionGlob(t *testing.T) {
 	require.Nil(t, err)
 	require.NotEmpty(t, downloadPayload)
 	assert.NotEmpty(t, downloadPayload[0].ProductId, "Expected response not to be empty")
-	require.Nil(t, err)
 
 	t.Logf(fmt.Sprintf("download_payload: %+v\n", downloadPayload))
 

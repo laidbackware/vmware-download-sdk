@@ -95,11 +95,8 @@ func TestGetFileArray(t *testing.T) {
 }
 
 func TestGetGetDlgProduct(t *testing.T) {
-	err = ensureLogin(t)
-	require.Nil(t, err)
-
 	var downloadGroup, productID string
-	downloadGroup, productID, err = authenticatedClient.GetDlgProduct("vmware_tools", "vmtools", "11.1.1")
+	downloadGroup, productID, err = basicClient.GetDlgProduct("vmware_tools", "vmtools", "11.1.1")
 	assert.Nil(t, err)
 	assert.NotEmpty(t, downloadGroup, "Expected response to no be empty")
 	assert.NotEmpty(t, productID, "Expected response to no be empty")
