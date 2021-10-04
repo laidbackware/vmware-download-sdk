@@ -47,7 +47,11 @@ func (c *Client) GetSubProductsMap(slug string) (data map[string]SubProduct, err
 	for _, majorVersion := range majorVersions {
 		var dlgEditionsList []DlgEditionsLists
 		dlgEditionsList, err = c.GetDlgEditionsList(slug, majorVersion)
-		if err != nil {
+		// Invalid version errors need to be ignored, as they come from deprecated products
+		if err == ErrorInvalidVersion {
+			err = nil
+			continue
+		} else if err != nil {
 			return
 		}
 		for _, dlgEdition := range dlgEditionsList {

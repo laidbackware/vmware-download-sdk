@@ -18,6 +18,16 @@ type Client struct {
 	XsrfToken  string
 }
 
+type TokenValidation struct {
+	IsAccessTokenValid    string `json:"isAccessTokenValid"`
+	IsRefreshTokenPresent string `json:"isRefreshTokenPresent"`
+	Cn                    string `json:"cn"`
+	Email                 string `json:"email"`
+	Firstname             string `json:"firstname"`
+	Lastname              string `json:"lastname"`
+	UserType              string `json:"userType"`
+}
+
 const (
 	baseURL = "https://customerconnect.vmware.com"
 	initURL = baseURL + "/web/vmware/login"

@@ -9,8 +9,15 @@ import (
 
 type AccountInfo struct {
 	UserType    string   `json:"userType"`
-	AccountList []string `json:"accntList"`
+	AccountList []AccntList `json:"accntList"`
 }
+
+type AccntList struct {
+	EaNumber  string `json:"eaNumber"`
+	EaName    string `json:"eaName"`
+	IsDefault string `json:"isDefault"`
+}
+
 type CurrentUser struct {
 	FirstName string `json:"firstname"`
 	LastName  string `json:"lastname"`
@@ -38,6 +45,7 @@ func (c *Client) AccountInfo() (data AccountInfo, err error) {
 	}
 
 	err = json.NewDecoder(res.Body).Decode(&data)
+
 	return
 }
 

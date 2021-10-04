@@ -8,9 +8,9 @@ import (
 
 func TestGetSubProductsSlice(t *testing.T) {
 	var subProducts []SubProduct
-	subProducts, err = basicClient.GetSubProductsSlice("vmware_vsphere")
+	subProducts, err = basicClient.GetSubProductsSlice("vmware_vsphere_hypervisor_esxi")
 	assert.Nil(t, err)
-	assert.Greater(t, len(subProducts), 16, "Expected response to contain at least 16 items")
+	assert.GreaterOrEqual(t, len(subProducts), 3, "Expected response to contain at least 3 items")
 }
 
 func TestGetSubProductsSliceInvalidSlug(t *testing.T) {
