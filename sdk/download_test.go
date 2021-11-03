@@ -73,7 +73,7 @@ func TestFetchDownloadLinkNotEntitled(t *testing.T) {
 	require.Nil(t, err)
 
 	var downloadPayload []DownloadPayload
-	downloadPayload, err = authenticatedClient.GenerateDownloadPayload("vmware_nsx_t_data_center", "nsx-t", "3.1.3", "nsx-unified-appliance-secondary-*.qcow2", false)
+	downloadPayload, err = authenticatedClient.GenerateDownloadPayload("vmware_nsx_t_data_center", "nsx-t", "3.1.3", "nsx-unified-appliance-secondary-*.qcow2", true)
 	assert.ErrorIs(t, err, ErrorNotEntitled)
 	assert.Empty(t, downloadPayload, "Expected response to be empty")
 }

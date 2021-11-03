@@ -18,55 +18,27 @@ var ErrorMultipleVersionGlob = errors.New("versions: invalid glob. a single vers
 func (c *Client) GetVersionMap(slug, subProductName string) (data map[string]APIVersions, err error) {
 	data = make(map[string]APIVersions)
 
-	var majorVersions []string
-	majorVersions, err = c.GetMajorVersionsSlice(slug)
+	var subProductDetails  SubProductDetails
+	subProductDetails, err = c.GetSubProduct(slug, subProductName)
 	if err != nil {
 		return
 	}
 
-	err = c.ValidateSubProduct(slug, subProductName)
-	if err != nil {
-		return
-	}
-	subProductName = strings.ToUpper(subProductName)
-
-	// Iterate over all major versions of product to collect actual versions
-	for _, majorVersion := range majorVersions {
-		var dlgEditionsList []DlgEditionsLists
-		dlgEditionsList, err = c.GetDlgEditionsList(slug, majorVersion)
-		if err != nil {
-			return
-		}
-		var foundProduct DlgList
-
-		// Iterate each edition of each major version of product
-		for _, edition := range dlgEditionsList {
-			for _, product := range edition.DlgList {
-				if strings.HasPrefix(product.Code, subProductName) {
-					foundProduct = product
-					break
-				}
+	// Loop through each major version and collect all versions
+	for majorVersion, dlgList := range subProductDetails.DlgListByVersion {
+		var dlgHeader DlgHeader
+			dlgHeader, err = c.GetDlgHeader(dlgList.Code, dlgList.ProductID)
+			if err != nil {
+				return
 			}
 
-			// When matching product is found pull nice version name and API code
-			if foundProduct.Name != "" {
-				var dlgHeader DlgHeader
-				dlgHeader, err = c.GetDlgHeader(foundProduct.Code, foundProduct.ProductID)
-				if err != nil {
-					return
+			for _, version := range dlgHeader.Versions {
+				aPIVersions := APIVersions{
+					Code:         version.ID,
+					MajorVersion: majorVersion,
 				}
-
-				for _, version := range dlgHeader.Versions {
-					aPIVersions := APIVersions{
-						Code:         version.ID,
-						MajorVersion: majorVersion,
-					}
-					data[version.Name] = aPIVersions
-				}
-			} else {
-				err = ErrorInvalidSubProduct
+				data[version.Name] = aPIVersions
 			}
-		}
 	}
 
 	return
@@ -88,6 +60,7 @@ func (c *Client) FindVersion(slug, subProduct, version string) (data APIVersions
 	} else {
 		searchVersion = version
 	}
+	
 	if _, ok := versionMap[searchVersion]; !ok {
 		err = ErrorInvalidVersion
 		return

@@ -89,7 +89,7 @@ func TestGetFileArray(t *testing.T) {
 	require.Nil(t, err)
 
 	var fileArray []string
-	fileArray, err = authenticatedClient.GetFileArray("vmware_tools", "vmtools", "11.1.1")
+	fileArray, err = authenticatedClient.GetFileArray("vmware_horizon", "dem+standard", "2106")
 	assert.Nil(t, err)
 	assert.NotEmpty(t, fileArray, "Expected response to no be empty")
 }
