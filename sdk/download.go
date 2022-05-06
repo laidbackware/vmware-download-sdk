@@ -28,6 +28,8 @@ type AuthorizedDownload struct {
 
 const (
 	downloadURL = baseURL + "/channel/api/v1.0/dlg/download"
+	//Keyword to use a product to force download of a given DownloadGroup and productId
+	downloadGroupKeyword = "DownloadGroup"
 )
 
 var ErrorInvalidDownloadPayload = errors.New("download: invalid download payload")
@@ -41,9 +43,12 @@ func (c *Client) GenerateDownloadPayload(slug, subProduct, version, fileName str
 		return
 	}
 
-	if _, ok := ProductDetailMap[slug]; !ok {
-		err = ErrorInvalidSlug
-		return
+	//If the key word is given there's no need to validate the product
+	if slug != downloadGroupKeyword {
+		if _, ok := ProductDetailMap[slug]; !ok {
+			err = ErrorInvalidSlug
+			return
+		}
 	}
 
 	var downloadGroup, productID string
