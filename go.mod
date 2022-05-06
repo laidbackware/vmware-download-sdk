@@ -1,4 +1,4 @@
-module github.com/idstam/vmware-download-sdk
+module github.com/laidbackware/vmware-download-sdk
 
 go 1.16
 
