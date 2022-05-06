@@ -97,3 +97,24 @@ func TestGenerateDownloadDoubleVersion(t *testing.T) {
 	assert.ErrorIs(t, err, ErrorMultipleVersionGlob)
 	assert.Empty(t, downloadPayload, "Expected response to be empty")
 }
+
+func TestFetshUnlistedProductLink(t *testing.T) {
+	err = ensureLogin(t)
+	require.Nil(t, err)
+
+	var downloadPayload []DownloadPayload
+	downloadPayload, err = authenticatedClient.GenerateDownloadPayload("DownloadGroup", "OEM-ESXI70U3-HPE", "974", "VMware-ESXi-7.0.3-19193900-HPE-*-Synergy-depot.zip", true)
+	assert.Nil(t, err)
+	require.NotEmpty(t, downloadPayload)
+	assert.NotEmpty(t, downloadPayload[0].ProductId, "Expected response not to be empty")
+
+	t.Logf(fmt.Sprintf("download_payload: %+v\n", downloadPayload))
+
+	var authorizedDownload AuthorizedDownload
+	authorizedDownload, _ = authenticatedClient.FetchDownloadLink(downloadPayload[0])
+	assert.Nil(t, err)
+	assert.NotEmpty(t, authorizedDownload.DownloadURL, "Expected response not to be empty")
+
+	t.Logf(fmt.Sprintf("download_details: %+v\n", authorizedDownload))
+
+}
