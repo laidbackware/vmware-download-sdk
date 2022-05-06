@@ -148,6 +148,14 @@ func (c *Client) GetFileArray(slug, subProduct, version string) (data []string, 
 }
 
 func (c *Client) GetDlgProduct(slug, subProduct, version string) (downloadGroup, productID string, err error) {
+
+	//If the keyword is given just return the supplied downloadGroup and productID
+	if slug == downloadGroupKeyword {
+		downloadGroup = subProduct
+		productID = version
+		return
+	}
+
 	// Find the API version details
 	var apiVersion APIVersions
 	apiVersion, err = c.FindVersion(slug, subProduct, version)
