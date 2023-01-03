@@ -1,4 +1,6 @@
-# vmware-download-sdk
+# <span style="color:red">**DEPRCATED - This SDK is can now be found [here](https://github.com/vmware-labs/vmware-customer-connect-sdk)**</span>.
+
+## vmware-download-sdk
 This SDK builds a layer of abstraction above customerconnect.vmware.com to hide the complexity for the client. This allows for downloads to be requested using the minimum of information.
 
 ## Usage
